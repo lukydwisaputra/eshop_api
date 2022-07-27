@@ -1,10 +1,11 @@
+require('dotenv').config();
 const express = require("express");
 const { authController } = require("./controllers");
 const { authRouter } = require("./routers");
 const cors = require("cors"); // cors -> membuat izin akses kepada frontend
 
 const app = express();
-const PORT = 3232;
+const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use(cors());
