@@ -6,7 +6,10 @@ const cors = require("cors"); // cors -> membuat izin akses kepada frontend
 
 const app = express();
 const PORT = process.env.PORT;
+const bearerToken = require('express-bearer-token');
 
+app.use(bearerToken());
+app.use(express.static('public'));
 app.use(express.json());
 app.use(cors());
 
@@ -27,4 +30,5 @@ dbConfig.getConnection((error, connection) => {
 // config router
 app.use("/auth", authRouter);
 app.use("/products", productsRouter);
+
 app.listen(PORT, () => console.log(`Running ESHOP API at ${PORT}`));

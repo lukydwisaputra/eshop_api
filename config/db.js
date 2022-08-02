@@ -1,4 +1,5 @@
 const mysql = require("mysql");
+const util = require('util');
 
 // mysql.createConnection = berjalan terus
 // mysql.createPool = berjalan setiap ada request ke mysql
@@ -10,4 +11,6 @@ const dbConfig = mysql.createPool({
 	database: process.env.MYSQL_NAME,
 });
 
-module.exports = { dbConfig };
+const dbQuery = util.promisify(dbConfig.query).bind(dbConfig);
+
+module.exports = { dbConfig, dbQuery };

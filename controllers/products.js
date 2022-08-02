@@ -1,4 +1,5 @@
-const { dbConfig } = require("../config/db");
+const { dbConfig, dbQuery } = require("../config/db");
+const fs = require('fs');
 
 const objectFilter = (inputObject, dataArray) => {
 	let inputKeys = Object.keys(inputObject);
@@ -21,50 +22,85 @@ const objectFilter = (inputObject, dataArray) => {
 };
 
 module.exports = {
-    getData: (req, res) => {
-        dbConfig.query(
-			"SELECT * FROM products;",
-			(error, result) => {
-				if (error) {
-					res.status(500).send(error);
-				}
-				console.log("getData", result);
-				res.status(200).send(result);
-			}
-		);
+    getData: async (req, res) => {
+		try {
+			let result = await dbQuery(`SELECT p.*, s.status FROM products p
+			JOIN status s on p.status_id = s.idstatus;`)
+			res.status(200).send(result);
+		} catch (error) {
+			console.log(error)
+			res.status(500).send(error);
+		}
     }, 
-	addProduct: (req, res) => {
-		let { name, brand, category, description, images, stock, price } = req.body;
-		console.log(req.body)
-		dbConfig.query(
-			`INSERT INTO products (name, brand, category, description, images, stock, price) VALUES 
-			(
-				${dbConfig.escape(name)},
-				${dbConfig.escape(brand)},
-				${dbConfig.escape(category)},
-				${dbConfig.escape(description)},
-				${dbConfig.escape(images)},
-				${stock},
-				${price}
-			);`,
-			(error, result) => {
-				if (error) {
-					res.status(500).send(error);
-				}
-				res.status(200).send(result);
+	addProduct: async (req, res) => {
+		
+		try {
+			// console.log(req.body)
+			console.log(req.files)
+			let data = JSON.parse(req.body.data);
+
+			let dataInput = [];
+			for (const prop in data) {
+				dataInput.push(dbConfig.escape(data[prop]))
 			}
-		);
+
+			console.log(dataInput);
+			dataInput.splice(4,0, dbConfig.escape(`/imageProduct/${req.files[0].filename}`))
+			console.log(dataInput);
+
+			let addData = await dbQuery(`INSERT INTO products (name, brand, category, description, images, stock, price) 
+				VALUES (${dataInput.join(',')});`)
+	
+			res.status(200).send({
+				success: true,
+				message: 'Add product success'
+			})
+		} catch (error) {
+			console.log(error);
+			fs.unlinkSync(`./public/imageProduct/${req.files[0].filename}`)
+			res.status(500).send(error);
+		}
 	},
 	deleteProduct: (req, res) => {
-		let id = req.query.id;
-		dbConfig.query(
-			`DELETE FROM products WHERE idproducts = ${dbConfig.escape(id)};`,
-			(error, result) => {
-				if (error) {
-					res.status(500).send(error);
+		if (req.dataToken.role === 'Admin') {
+			dbConfig.query(
+				`DELETE FROM products WHERE idproducts = ${dbConfig.escape(req.params.id)};`,
+				(error, result) => {
+					if (error) {
+						res.status(500).send(error);
+					}
+					res.status(200).send({seccess: true, message: 'product deleted'});
 				}
-				res.status(200).send(result);
-			}
-		);
+			);
+		} else {
+			res.status(401).send({seccess: false, message: 'Unauthorized'});
+		}
+	},
+	updateProduct: async (req, res) => {
+		// let data = JSON.parse(fs.readFileSync('./db.json'));
+        // let productsData = JSON.parse(fs.readFileSync('./db.json')).products;
+
+        // let index = data.products.findIndex(
+        //     (val) => Object.values(req.params) == val[Object.keys(req.params)]
+        // );
+        // if (index >= 0) {
+        //     productsData[index] = { ...productsData[index], ...req.body };
+        //     data.products = productsData
+        //     let json = JSON.stringify(data);
+
+        //     fs.writeFileSync('./db.json', json);
+        //     res.status(200).send(productsData[index]);
+        // } else {
+        //     res.status(400).send({
+        //         success: false,
+        //         erorr: 'Data not found ⚠️'
+        //     });
+        // }
+		// UPDATE `eshop`.`products` SET `category` = 'Dinings' WHERE (`idproducts` = '6');
+		try {
+			let result = await dbQuery(`UPDATE products SET `)
+		} catch (error) {
+			
+		}
 	}
 }
