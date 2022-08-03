@@ -7,12 +7,12 @@ module.exports = {
     },
     createToken: (payload) => jwt.sign(payload, 'shopping', {expiresIn: '1h'}),
     readToken: (req, res, next) =>  {
-        console.log("token", req.token)
+        // console.log("token", req.token)
         jwt.verify(req.token, 'shopping', (err, decode) => {
             if (err) {
                 return res.status(401).send({success: false, message: 'Unauthorized ❌'})
             }
-            console.log('Translate token :', decode);
+            // console.log('Translate token :', decode);
             req.dataToken = decode;
             next();
         })

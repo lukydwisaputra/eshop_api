@@ -8,13 +8,12 @@ const {readToken} = require('../config/encrypt')
 // konfigurasi uploader
 const uploadFile = uploader('/imageProduct', 'IMGPRD').array('images', 1);
 
-
 route.get('/', getData);
 route.get('/admin', getData);
 
 route.post('/', uploadFile, readToken, addProduct);
 
-route.patch('/:id', updateProduct);
+route.patch('/:id', readToken, updateProduct);
 route.delete('/:id', readToken, deleteProduct);
 
 module.exports = route;

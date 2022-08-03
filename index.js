@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require("express");
 const { authController, productsController } = require("./controllers");
-const { authRouter, productsRouter } = require("./routers");
+const { authRouter, productsRouter, cartRouter } = require("./routers");
 const cors = require("cors"); // cors -> membuat izin akses kepada frontend
 
 const app = express();
@@ -30,5 +30,6 @@ dbConfig.getConnection((error, connection) => {
 // config router
 app.use("/auth", authRouter);
 app.use("/products", productsRouter);
+app.use("/cart", cartRouter);
 
 app.listen(PORT, () => console.log(`Running ESHOP API at ${PORT}`));
